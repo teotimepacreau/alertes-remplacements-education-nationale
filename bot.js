@@ -5,18 +5,17 @@ function sleep(ms) {
      })
 }
 (async ()=> {
-    const browser = await puppeteer.launch({headless: false})// SI ON PAS MET HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER  
+    const browser = await puppeteer.launch({
+        headless: false, // SI ON PAS MET HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER 
+        slowMo: 50,
+        devtools: true,
+    }) 
     const page = await browser.newPage()
-    await page.goto('https://eservices.nantesmetropole.fr/web/guest/accueil-particuliers')
+    await page.goto('https://catalogue-bibliotheque.nantes.fr/account#')
 
 
-    await page.click('#sign-in')
-    await sleep(2000)
-
-    await page.type("[name='user']", process.env.IDENTIFIANT)
-    await page.type("[name='password']", process.env.PASSWORD)
-    await page.click("#submitLDAP")
-    await sleep(6000)
-
-    await browser.close()
+    await page.locator("#loginField").fill(process.env.IDENTIFIANT)
+    await page.locator("#passwordField").fill(process.env.PASSWORD)
+    await page.locator('main form button:nth-child(3)').click()
+    // await browser.close()
 })()
