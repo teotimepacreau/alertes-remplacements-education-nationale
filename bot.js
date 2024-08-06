@@ -37,9 +37,7 @@ const generateRandomUA = () => {
     await page.locator("#loginField").fill(process.env.IDENTIFIANT)//filling username input
     await page.locator("#passwordField").fill(process.env.PASSWORD)//filling password input
 
-    await page.locator('#passwordField').scroll({
-        scrollDown: 10,
-      });
+    await page.mouse.wheel({deltaY: -10});
     
     //   hover btn Connexion
     await page.locator('main form button:nth-child(3)').hover()
@@ -66,25 +64,10 @@ const generateRandomUA = () => {
         }
     )
     
-    let arrayConvertiEnDateJS = arrayDateDeRetourDeChaqueEmprunt.map(dateString => ddmmyyyyToDate(dateString))
+    let arrayDateDeRetourConvertiEnDateJS = arrayDateDeRetourDeChaqueEmprunt.map(dateString => ddmmyyyyToDate(dateString))
 
-    console.log(arrayConvertiEnDateJS)
-    // let elementLivreReserve = await page.evaluate('#searchresult > div:nth-child(1) > div.jss938 > div.jss940 > div:nth-child(2) > div > ul > div:nth-child(2) > li > div.jss1009 > *', elements => {
-    //     return elements.forEach((element)=> element.textContent)
-    // })
-    // console.log(elementLivreReserve)
+    console.log(arrayDateDeRetourConvertiEnDateJS)
 
-
-    // let retour = await page.evaluate((element) => {
-    //     return element.textContent
-    // },elementLivreReserve)
-
-    
-
-
-    // let dateRetour = ddmmyyyyToDate(retour)
-
-    // console.log(dateRetour)
 
     // let dateAujourdhui = new Date()
     // console.log(dateAujourdhui)
