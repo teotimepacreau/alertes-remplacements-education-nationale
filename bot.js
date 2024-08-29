@@ -1,4 +1,7 @@
 import puppeteer from "puppeteer";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const generateRandomUA = () => {
     // Array of random user agents
@@ -17,10 +20,10 @@ const generateRandomUA = () => {
     return userAgents[randomUAIndex];
   }
 
-(async ()=> {
+let scrapper = async ()=> {
     const browser = await puppeteer.launch({
-        headless: false, // SI ON PAS MET HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER 
-        slowMo: 120,
+        headless: true, // SI ON PAS MET HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER 
+        slowMo: 40,
     })
     const page = await browser.newPage()
 
@@ -31,62 +34,60 @@ const generateRandomUA = () => {
   await page.setUserAgent(customUA);
 
 
-    await page.goto('https://catalogue-bibliotheque.nantes.fr/account#')
+    await page.goto('https://recrutement.education.gouv.fr/recrutement/offres?term=&Region__c=52&Departement__c=044&Population__c=EN2D%3BDE')
 
+    // PSEUDO CODE : je souhaite recevoir toutes les semaines la date et le titre de l'annonce. I. Dans chaque article, je sélectionne la date et l'annonce, j'insère dans un array d'objet [{date: , titre:}]
+    let dateArray = await page.$$eval('::-p-text(Publié le)', elements => {
+      return Array.from(elements).map((element)=> {
+        return element.textContent
+      })
+    })
 
-    await page.locator("#loginField").fill(process.env.IDENTIFIANT)//filling username input
-    await page.locator("#passwordField").fill(process.env.PASSWORD)//filling password input
+    let titreArray = await page.$$eval('.fr-card__title', elements => {
+      return Array.from(elements).map((element)=> {
+        return element.textContent
+      })
+    })
 
-    await page.mouse.wheel({deltaY: -10});
-    
-    //   hover btn Connexion
-    await page.locator('main form button:nth-child(3)').hover()
-    
-    // click btn Connexion
-    await page.locator('main form button:nth-child(3)').click()
-    
-    // click sur btn "Emprunts en cours"
-    await page.locator('#app > div > div:nth-child(3) > div > div > div > div > div > div > div > div._c8-1 > div > div._0-0 > div > div._c9-0 > main > div > div > div > div > ul > div:nth-child(4) > div:nth-child(2) > div').click()
-
-    function ddmmyyyyToDate(dateString) {
-        const parts = dateString.split('/');
-        const day = parseInt(parts[0]);
-        const month = parseInt(parts[1]) - 1; // Les mois en JavaScript commencent à 0
-        const year = parseInt(parts[2]);
-        return new Date(year, month, day);
+    let arrayConsolide = dateArray.map((date, index) => {
+      return {
+        date,
+        titre: titreArray[index]
       }
-    
-    let arrayDateDeRetourDeChaqueEmprunt = await page.$$eval("::-p-text(Date de retour)",
-        (elements) => {
-            return Array.from(elements).map((element) => {
-               return element.previousElementSibling.textContent
-            });//chaque date est en string
-        }
-    )
-    
-    let arrayDateDeRetourConvertiEnDateJS = arrayDateDeRetourDeChaqueEmprunt.map(dateString => ddmmyyyyToDate(dateString))
-
-    console.log(arrayDateDeRetourConvertiEnDateJS)
-
-
-    // let dateAujourdhui = new Date()
-    // console.log(dateAujourdhui)
-
-    // let troisJours = 1000 * 60 * 60 * 24 * 3//nb de millisecondes dans 3 jours
-
-
-    // // Calculer la différence en jours entre la date de retour et aujourd'hui
-    // let differenceInDays = Math.ceil((dateRetour - dateAujourdhui) / troisJours);
-    // console.log(differenceInDays)
-
-    // // Vérifier si la différence est supérieure ou égale à 3 jours
-    // if (differenceInDays >= 3) {
-    //     console.log('ne pas cliquer sur renouveler')
-    // } else {
-    //     console.log('cliquer sur renouveler')
-    // //cliquer sur Renouveler
-    // }
-
-    
+    })
+    console.log(arrayConsolide)
+    return arrayConsolide
     // await browser.close()
-})()
+}
+let mailer = async()=> {
+  try {
+    let arrayConsolide = await scrapper()
+    let htmlContent = "";
+    arrayConsolide.forEach(annonce => {
+      htmlContent += `
+        <h2>Recherche ${annonce.titre}</h2>
+        <p>${annonce.date}</p>
+      `;
+    });
+    const msg = {
+      to: process.env.TO_EMAIL, // Change to your recipient
+      from: process.env.FROM_EMAIL, // Change to your verified sender
+      subject: 'Nouvelles annonces remplacement Education Nationale',
+      html: htmlContent, 
+    }
+
+    sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent')
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+  }
+  catch(err){
+    console.error(err)
+  }
+}
+mailer()
+
