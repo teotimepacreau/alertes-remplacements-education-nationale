@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 import sgMail from "@sendgrid/mail";
+import cron from "node-cron"
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
@@ -89,5 +90,6 @@ let mailer = async()=> {
     console.error(err)
   }
 }
-mailer()
+
+cron.schedule('0 17 * * 2', ()=> mailer(), {timezone: "Europe/Paris"})//run tous les mardis à 17h00
 
