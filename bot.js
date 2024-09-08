@@ -23,8 +23,8 @@ const generateRandomUA = () => {
 
 let scrapper = async ()=> {
     const browser = await puppeteer.launch({
-        headless: true, // SI ON PAS MET HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER 
-        slowMo: 40,
+        headless: true, // SI ON MET PAS HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER 
+        slowMo: 50,
     })
     const page = await browser.newPage()
 
@@ -57,8 +57,8 @@ let scrapper = async ()=> {
       }
     })
     console.log(arrayConsolide)
+    await browser.close()
     return arrayConsolide
-    // await browser.close()
 }
 let mailer = async()=> {
   try {
@@ -71,8 +71,8 @@ let mailer = async()=> {
       `;
     });
     const msg = {
-      to: process.env.TO_EMAIL, // Change to your recipient
-      from: process.env.FROM_EMAIL, // Change to your verified sender
+      to: process.env.TO_EMAIL,
+      from: process.env.FROM_EMAIL,
       subject: 'Nouvelles annonces remplacement Education Nationale',
       html: htmlContent, 
     }
@@ -83,13 +83,13 @@ let mailer = async()=> {
       console.log('Email sent')
     })
     .catch((error) => {
-      console.error(error)
+      console.error('client pb mail', error)
     })
   }
   catch(err){
-    console.error(err)
+    console.error('serveur ne parvient pas à envoyer le mail :', err)
   }
 }
-
-cron.schedule('0 17 * * 2', ()=> mailer(), {timezone: "Europe/Paris"})//run tous les mardis à 17h00
+mailer()
+// cron.schedule('0 17 * * 2', ()=> mailer(), {timezone: "Europe/Paris"})//run tous les mardis à 17h00
 

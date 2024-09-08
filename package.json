@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node --env-file=.env bot.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.3",
