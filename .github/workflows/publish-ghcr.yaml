@@ -1,0 +1,15 @@
+name: Docker Image CI for GHCR
+
+on:
+  push
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3 #la version actuelle des actions checkout de github workflow : ça prend notre code du repo et le met dans le Action Runner pour que ça puisse build le code
+      - name: Build and push the Image
+        run: |
+          sudo docker login --username teotimepacreau --password ${{ secrets.DOCKER_GITHUB_TOKEN }} ghcr.io
+          sudo docker build . --tag ghcr.io/teotimepacreau/alertes-remplacements-education-nationale
+          sudo docker push ghcr.io/teotimepacreau/alertes-remplacements-education-nationale
