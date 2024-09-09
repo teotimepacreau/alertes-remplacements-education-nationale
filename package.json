@@ -1,10 +1,11 @@
 {
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env bot.js"
+    "start": "node bot.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.3",
+    "dotenv": "^16.4.5",
     "node-cron": "^3.0.3",
     "puppeteer": "^22.14.0",
     "resend": "^4.0.0"

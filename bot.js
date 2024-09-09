@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer";
 import cron from "node-cron";
 import { Resend } from "resend";
+import 'dotenv/config'
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
