@@ -1,8 +1,9 @@
 import puppeteer from "puppeteer";
-import sgMail from "@sendgrid/mail";
 import cron from "node-cron"
+import { Resend } from 'resend';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 const generateRandomUA = () => {
     // Array of random user agents
@@ -70,21 +71,13 @@ let mailer = async()=> {
         <p>${annonce.date}</p>
       `;
     });
-    const msg = {
-      to: process.env.TO_EMAIL,
+    console.log('htmlContent: ',htmlContent)
+    resend.emails.send({
       from: process.env.FROM_EMAIL,
+      to: process.env.TO_EMAIL,
       subject: 'Nouvelles annonces remplacement Education Nationale',
-      html: htmlContent, 
-    }
-
-    sgMail
-    .send(msg)
-    .then(() => {
-      console.log('Email sent')
-    })
-    .catch((error) => {
-      console.error('client pb mail', error)
-    })
+      html: htmlContent,
+    });
   }
   catch(err){
     console.error('serveur ne parvient pas à envoyer le mail :', err)
