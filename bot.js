@@ -25,7 +25,8 @@ const generateRandomUA = () => {
 let scrapper = async () => {
   const browser = await puppeteer.launch({
     headless: true, // SI ON MET PAS HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER
-    slowMo: 50,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],//je déactive le sandbox de Chromium car ça fait bugger le container Docker une fois déployé
+    slowMo: 50,//ralenti chaque actions de 50ms
   });
   const page = await browser.newPage();
 
@@ -92,4 +93,4 @@ let mailer = async () => {
   }
 };
 // mailer()
-cron.schedule("30 9 * * 3", () => mailer(), { timezone: "Europe/Paris" }); //run tous les mercredis à 9h30
+cron.schedule("00 10 * * 3", () => mailer(), { timezone: "Europe/Paris" }); //run tous les mercredis à 10h00
