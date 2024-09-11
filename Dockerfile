@@ -4,12 +4,14 @@ FROM ghcr.io/puppeteer/puppeteer:latest
 # dossier qui sera la base dans le container
 WORKDIR /app
 
-# pour ne pas avoir à re-installer les node_modules à chaque fois 
+# on commence par copier le package.json pour pouvoir ensuite installer les dépendances
 COPY package.json /app
 
+# on installe les dépendances
 RUN npm install
 
-# copies the entire project directory to the Docker image
+# on copie tout notre dossier de code dans le workdir
 COPY . /app
 
+# on démarre le script
 CMD [ "npm", "start"]
