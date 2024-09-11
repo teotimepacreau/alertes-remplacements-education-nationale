@@ -93,4 +93,4 @@ let mailer = async () => {
   }
 };
 // mailer()
-cron.schedule("00 10 * * 3", () => mailer(), { timezone: "Europe/Paris" }); //run tous les mercredis à 10h00
+cron.schedule("10 10 * * 3", () => mailer(), { timezone: "Europe/Paris" }); //run tous les mercredis à 10h00
