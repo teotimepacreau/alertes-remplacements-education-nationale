@@ -76,7 +76,7 @@ let mailer = async () => {
 
     (async function () {
       const { data, error } = await resend.emails.send({
-        from: "Acme <onboarding@resend.dev>", //process.env.FROM_EMAIL
+        from: process.env.FROM_EMAIL, //RESEND envoie depuis le sous domaine que j'ai configuré dans l'UI de Resend, je peux mettre blabla@sousdomaine.fr en expéditeur
         to: process.env.TO_EMAIL,
         subject: "Nouvelles annonces remplacement education nationale",
         html: htmlContent,
