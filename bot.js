@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import cron from "node-cron";
 import { Resend } from "resend";
-import 'dotenv/config'
+import "dotenv/config";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -24,9 +24,9 @@ const generateRandomUA = () => {
 
 let scrapper = async () => {
   const browser = await puppeteer.launch({
-    headless: true, // SI ON MET PAS HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],//je déactive le sandbox de Chromium car ça fait bugger le container Docker une fois déployé
-    slowMo: 50,//ralenti chaque actions de 50ms
+    headless: false, // SI ON MET PAS HEADLESS FALSE ON NE VERRA PAS LE NAVIGATEUR S'OUVRIR ET EXÉCUTER
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], //je déactive le sandbox de Chromium car ça fait bugger le container Docker une fois déployé
+    slowMo: 50, //ralenti chaque actions de 50ms
   });
   const page = await browser.newPage();
 
@@ -60,9 +60,50 @@ let scrapper = async () => {
     };
   });
   console.log(arrayConsolide);
+
+  // CLIQUER SUR CHAQUE TITRE D'ANNONCE POUR RECUPERER SON URL
+  // let annoncesURLs = [];
+  // // Compter le nombre d'annonces
+  // let jobCount = await page.$$eval(
+  //   ".fr-card__title",
+  //   (titles) => titles.length
+  // );
+  // console.log("jobCount", jobCount);
+
+  // for (let i = 0; i < jobCount; i++) {
+  //   try {
+  //     // 2. Re-sélectionner les titres d'annonces après chaque navigation
+  //     const jobTitles = await page.$$(".fr-card__title");
+
+  //     // 3. Cliquer sur le titre d'annonce (re-selectionné)
+  //     await jobTitles[i].click();
+
+  //     // 4. Attendre que la page ait complètement chargé après le clic
+  //     await page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 60000 });
+
+
+  //     // 5. Récupérer l'URL de la page actuelle
+  //     let jobUrl = page.url();
+  //     annoncesURLs.push(jobUrl);
+
+  //     // 6. Revenir à la page précédente (liste des offres)
+  //     await page.goBack();
+
+  //     // 7. Attendre que la page précédente ait complètement chargé
+  //     await page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 60000 });
+
+
+  //     // 8. Attendre que les titres d'annonces soient de nouveau visibles
+  //     await page.waitForSelector(".fr-card__title");
+  //   } catch (err) {
+  //     console.error(`erreur pour l'annonce ${i}`, err);
+  //   }
+  // }
+
   await browser.close();
   return arrayConsolide;
 };
+
 let mailer = async () => {
   try {
     let arrayConsolide = await scrapper();
@@ -92,5 +133,5 @@ let mailer = async () => {
     console.error("serveur ne parvient pas à envoyer le mail :", err);
   }
 };
-// mailer()
+// mailer();
 cron.schedule("20 10 * * 3", () => mailer(), { timezone: "Europe/Paris" }); //run tous les mercredis à 10h00
