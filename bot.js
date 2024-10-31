@@ -38,7 +38,6 @@ let scrapper = async () => {
     });
 
     await browser.close();
-    console.log("resultatDuScrapper", resultatDuScrapper);
     return resultatDuScrapper;
   } catch (error) {
     console.error(error);
@@ -84,19 +83,16 @@ let ajoutUrlAuxAnnonces = async () => {
       let urlConsolide =
         "https://recrutement.education.gouv.fr/recrutement/offreemploi/" + url;
       item.url = urlConsolide;
-    })
-    console.log("arrayAnnonces", arrayAnnonces)
-    return arrayAnnonces
-  }catch (error) {
+    });
+    return arrayAnnonces;
+  } catch (error) {
     console.error(error);
   }
 };
 
-
 let mailer = async () => {
   try {
     let arrayConsolide = await ajoutUrlAuxAnnonces();
-    console.log("arrayConsolide", arrayConsolide);
     let htmlContent = "";
     arrayConsolide.forEach((annonce) => {
       htmlContent += `
@@ -105,24 +101,22 @@ let mailer = async () => {
       `;
     });
 
-    (async function () {
-      const { data, error } = await resend.emails.send({
-        from: process.env.FROM_EMAIL, //RESEND envoie depuis le sous domaine que j'ai configuré dans l'UI de Resend, je peux mettre blabla@sousdomaine.fr en expéditeur
-        to: process.env.TO_EMAIL,
-        subject: "Nouvelles annonces remplacement education nationale",
-        html: htmlContent,
-      });
+    const { data, error } = await resend.emails.send({
+      from: process.env.FROM_EMAIL, //RESEND envoie depuis le sous domaine que j'ai configuré dans l'UI de Resend, je peux mettre blabla@sousdomaine.fr en expéditeur
+      to: process.env.TO_EMAIL,
+      subject: "Nouvelles annonces remplacement education nationale",
+      html: htmlContent,
+    });
 
-      if (error) {
-        return console.error({ error });
-      }
-
-      console.log({ data });
-    })();
+    if (error) {
+      return console.error({ error });
+    }
   } catch (err) {
-    console.error("serveur ne parvient pas à envoyer le mail :", err);
+    console.error("Erreur lors de l'envoi de l'email:", err);
   }
 };
+
 // mailer();
+
 
 cron.schedule("20 10 * * 3", () => mailer(), { timezone: "Europe/Paris" }); //run tous les mercredis à 10h00
